@@ -1,0 +1,37 @@
+name: Upload Python Package
+
+on:
+  push:
+    tags:
+      - v*
+
+permissions:
+  contents: read
+
+jobs:
+  deploy:
+
+    runs-on: ubuntu-latest
+    environment: pypi-release-env
+    permissions:
+      id-token: write
+    steps:
+    - name: Harden Runner
+      uses: step-security/harden-runner@5c7944e73c4c2a096b17a9cb74d65b6c2bbafbde # v2.9.1
+      with:
+        egress-policy: audit
+
+    - uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4.1.7
+    - name: Set up Python
+      uses: actions/setup-python@39cd14951b08e74b54015e9e001cdefcf80e669f # v5.1.1
+      with:
+        python-version: '3.10'
+    - name: Install build deps
+      run: pip install --upgrade pip setuptools wheel build
+    - name: Build
+      run: |
+        python -m build
+    - name: Install Twine
+      run: pip install twine
+    - name: Publish to pypi
+      uses: pypa/gh-action-pypi-publish@ec4db0b4ddc65acdf4bff5fa45ac92d78b56bdf0 # release/v1

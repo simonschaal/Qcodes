@@ -38,6 +38,7 @@ else:
     class StrEnum(str, Enum):
         pass
 
+
 log = logging.getLogger(__name__)
 
 
@@ -48,7 +49,6 @@ class LuaSweepParameter(ArrayParameter):
     """
 
     def __init__(self, name: str, instrument: Instrument, **kwargs: Any) -> None:
-
         super().__init__(
             name=name,
             shape=(1,),
@@ -68,6 +68,7 @@ class LuaSweepParameter(ArrayParameter):
             mode: Type of sweep, either 'IV' (voltage sweep),
                 'VI' (current sweep two probe setup) or
                 'VIfourprobe' (current sweep four probe setup)
+
         """
 
         if mode not in ["IV", "VI", "VIfourprobe"]:
@@ -104,7 +105,6 @@ class LuaSweepParameter(ArrayParameter):
         self.mode = mode
 
     def get_raw(self) -> np.ndarray:
-
         if self.instrument is not None:
             data = self.instrument._fast_sweep(
                 self.start, self.stop, self.steps, self.mode
@@ -128,6 +128,7 @@ class TimeTrace(ParameterWithSetpoints):
 
         Raises:
             RuntimeError: If no instrument attached to Parameter.
+
         """
         if self.instrument is None:
             raise RuntimeError("No instrument attached to Parameter.")
@@ -153,6 +154,7 @@ class TimeTrace(ParameterWithSetpoints):
         Args:
             mode: User defined mode for the timetrace. It can be either
             "current" or "voltage".
+
         """
         if mode == "current":
             self.unit = "A"
@@ -167,6 +169,7 @@ class TimeTrace(ParameterWithSetpoints):
 
         Raises:
             RuntimeError: If no instrument attached to Parameter.
+
         """
 
         if self.instrument is None:
@@ -195,7 +198,6 @@ class TimeTrace(ParameterWithSetpoints):
         return self.instrument._execute_lua(script, npts)
 
     def get_raw(self) -> np.ndarray:
-
         if self.instrument is None:
             raise RuntimeError("No instrument attached to Parameter.")
 
@@ -211,7 +213,6 @@ class TimeAxis(Parameter):
     """
 
     def get_raw(self) -> np.ndarray:
-
         if self.instrument is None:
             raise RuntimeError("No instrument attached to Parameter.")
 
@@ -264,9 +265,7 @@ class _ParameterWithStatus(Parameter):
             for i in bin(int(float(meas_status))).replace("0b", "").zfill(16)[::-1]
         ]
 
-        status = _from_bits_tuple_to_status[
-            (status_bits[0], status_bits[1])
-        ]  # pyright: ignore[reportArgumentType]
+        status = _from_bits_tuple_to_status[(status_bits[0], status_bits[1])]  # pyright: ignore[reportArgumentType]
 
         return float(value), status
 
@@ -359,6 +358,7 @@ class Keithley2600Channel(InstrumentChannel):
             name: The 'colloquial' name of the channel
             channel: The name used by the Keithley, i.e. either
                 'smua' or 'smub'
+
         """
 
         if channel not in ["smua", "smub"]:
@@ -667,6 +667,7 @@ class Keithley2600Channel(InstrumentChannel):
             mode: Type of sweep, either 'IV' (voltage sweep),
                 'VI' (current sweep two probe setup) or
                 'VIfourprobe' (current sweep four probe setup)
+
         """
         try:
             from qcodes_loop.measure import Measure
@@ -701,6 +702,7 @@ class Keithley2600Channel(InstrumentChannel):
             mode: Type of sweep, either 'IV' (voltage sweep),
                 'VI' (current sweep two probe setup) or
                 'VIfourprobe' (current sweep four probe setup)
+
         """
 
         channel = self.channel
@@ -761,6 +763,7 @@ class Keithley2600Channel(InstrumentChannel):
         Args:
             _script: The Lua script to be executed.
             steps: Number of points.
+
         """
         nplc = self.nplc()
         linefreq = self.linefreq()
@@ -831,6 +834,7 @@ class Keithley2600(VisaInstrument):
             name: Name to use internally in QCoDeS
             address: VISA resource address
             **kwargs: kwargs are forwarded to base class.
+
         """
         super().__init__(name, address, **kwargs)
 
@@ -1023,6 +1027,7 @@ class Keithley2600(VisaInstrument):
             program: A list of program instructions. One line per
                 list item, e.g. ['for ii = 1, 10 do', 'print(ii)', 'end' ]
             debug: log additional debug output
+
         """
         mainprog = "\r\n".join(program) + "\r\n"
         wrapped = f"loadandrunscript\r\n{mainprog}endscript"

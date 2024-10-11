@@ -1,4 +1,5 @@
 """Base class for Instrument and InstrumentModule"""
+
 from __future__ import annotations
 
 import collections.abc
@@ -48,6 +49,7 @@ class InstrumentBaseKWArgs(TypedDict):
     the ``name`` is used.
     """
 
+
 class InstrumentBase(MetadatableWithName, DelegateAttributes):
     """
     Base class for all QCodes instruments and instrument channels
@@ -59,6 +61,7 @@ class InstrumentBase(MetadatableWithName, DelegateAttributes):
             instrument's JSON snapshot.
         label: nicely formatted name of the instrument; if None, the
             ``name`` is used.
+
     """
 
     def __init__(
@@ -154,6 +157,7 @@ class InstrumentBase(MetadatableWithName, DelegateAttributes):
             ValueError: If there is an existing abstract parameter and the
                 unit of the new parameter is inconsistent with the existing
                 one.
+
         """
         if parameter_class is None:
             parameter_class = cast(type[TParameter], Parameter)
@@ -201,13 +205,19 @@ class InstrumentBase(MetadatableWithName, DelegateAttributes):
 
         Raises:
             KeyError: If the parameter does not exist on the instrument.
+
         """
         self.parameters.pop(name)
 
         is_property = isinstance(getattr(self.__class__, name, None), property)
 
         if not is_property and hasattr(self, name):
-            delattr(self, name)
+            try:
+                delattr(self, name)
+            except AttributeError:
+                self.log.warning(
+                    "Could not remove attribute %s from %s", name, self.full_name
+                )
 
     def add_function(self, name: str, **kwargs: Any) -> None:
         """
@@ -235,6 +245,7 @@ class InstrumentBase(MetadatableWithName, DelegateAttributes):
         Raises:
             KeyError: If this instrument already has a function with this
                 name.
+
         """
         if name in self.functions:
             raise KeyError(f"Duplicate function name {name}")
@@ -268,6 +279,7 @@ class InstrumentBase(MetadatableWithName, DelegateAttributes):
                 name.
             TypeError: If the submodule that we are trying to add is
                 not an instance of an ``Metadatable`` object.
+
         """
         if name in self.submodules:
             raise KeyError(f"Duplicate submodule name {name}")
@@ -295,6 +307,7 @@ class InstrumentBase(MetadatableWithName, DelegateAttributes):
 
         Raises:
             KeyError: If the component does not exist.
+
         """
         name_parts = full_name.split("_")
         name_parts.reverse()
@@ -305,7 +318,6 @@ class InstrumentBase(MetadatableWithName, DelegateAttributes):
     def _get_component_by_name(
         self, potential_top_level_name: str, remaining_name_parts: list[str]
     ) -> MetadatableWithName:
-
         log.debug(
             "trying to find component %s on %s, remaining %s",
             potential_top_level_name,
@@ -398,6 +410,7 @@ class InstrumentBase(MetadatableWithName, DelegateAttributes):
 
         Returns:
             dict: base snapshot
+
         """
 
         if params_to_skip_update is None:
@@ -459,6 +472,7 @@ class InstrumentBase(MetadatableWithName, DelegateAttributes):
             max_chars: the maximum number of characters per line. The
                 readable snapshot will be cropped if this value is exceeded.
                 Defaults to 80 to be consistent with default terminal width.
+
         """
         floating_types = (float, np.integer, np.floating)
         snapshot = self.snapshot(update=update)
@@ -654,6 +668,10 @@ class InstrumentBase(MetadatableWithName, DelegateAttributes):
     #
     delegate_attr_dicts: ClassVar[list[str]] = ["parameters", "functions", "submodules"]
 
+    @deprecated(
+        "Use attributes directly on the instrument object instead.",
+        category=QCoDeSDeprecationWarning,
+    )
     def __getitem__(self, key: str) -> Callable[..., Any] | Parameter:
         """Delegate instrument['name'] to parameter or function 'name'."""
         try:
@@ -661,6 +679,10 @@ class InstrumentBase(MetadatableWithName, DelegateAttributes):
         except KeyError:
             return self.functions[key]
 
+    @deprecated(
+        "Call set directly on the parameter.",
+        category=QCoDeSDeprecationWarning,
+    )
     def set(self, param_name: str, value: Any) -> None:
         """
         Shortcut for setting a parameter from its name and new value.
@@ -668,9 +690,14 @@ class InstrumentBase(MetadatableWithName, DelegateAttributes):
         Args:
             param_name: The name of a parameter of this instrument.
             value: The new value to set.
+
         """
         self.parameters[param_name].set(value)
 
+    @deprecated(
+        "Call get directly on the parameter.",
+        category=QCoDeSDeprecationWarning,
+    )
     def get(self, param_name: str) -> Any:
         """
         Shortcut for getting a parameter from its name.
@@ -680,9 +707,14 @@ class InstrumentBase(MetadatableWithName, DelegateAttributes):
 
         Returns:
             The current value of the parameter.
+
         """
         return self.parameters[param_name].get()
 
+    @deprecated(
+        "Call the function directly.",
+        category=QCoDeSDeprecationWarning,
+    )
     def call(self, func_name: str, *args: Any) -> Any:
         """
         Shortcut for calling a function from its name.
@@ -693,6 +725,7 @@ class InstrumentBase(MetadatableWithName, DelegateAttributes):
 
         Returns:
             The return value of the function.
+
         """
         return self.functions[func_name].call(*args)
 

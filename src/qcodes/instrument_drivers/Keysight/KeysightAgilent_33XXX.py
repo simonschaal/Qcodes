@@ -48,6 +48,7 @@ class Keysight33xxxOutputChannel(InstrumentChannel):
             name: The name of the channel
             channum: The number of the channel in question (1-2)
             **kwargs: kwargs are forwarded to base class.
+
         """
         super().__init__(parent, name, **kwargs)
 
@@ -61,12 +62,13 @@ class Keysight33xxxOutputChannel(InstrumentChannel):
                 parser: Either int or float, what to return in finite
                     cases
                 inputstring: The raw return value
+
             """
 
             inputstring = inputstring.strip()
 
             if float(inputstring) == 9.9e37:
-                output = float('inf')
+                output = float("inf")
             else:
                 output = float(inputstring)
                 if parser is int:
@@ -343,7 +345,6 @@ class Keysight33xxxSyncChannel(InstrumentChannel):
         """Parameter output"""
 
         if parent.num_channels == 2:
-
             self.source: Parameter = self.add_parameter(
                 "source",
                 label="Source of sync function",
@@ -381,32 +382,35 @@ class Keysight33xxx(KeysightErrorQueueMixin, VisaInstrument):
             address: The VISA resource name.
             silent: If True, no connect message is printed.
             **kwargs: kwargs are forwarded to base class.
+
         """
 
         super().__init__(name, address, **kwargs)
-        self.model = self.IDN()['model']
+        self.model = self.IDN()["model"]
 
         #######################################################################
         # Here go all model specific traits
 
         # TODO: Fill out this dict with all models
-        no_of_channels = {'33210A': 1,
-                          '33250A': 1,
-                          '33511B': 1,
-                          '33512B': 2,
-                          '33522B': 2,
-                          '33622A': 2,
-                          '33510B': 2,
-                          }
+        no_of_channels = {
+            "33210A": 1,
+            "33250A": 1,
+            "33511B": 1,
+            "33512B": 2,
+            "33522B": 2,
+            "33622A": 2,
+            "33510B": 2,
+        }
 
-        self._max_freqs = {'33210A': 10e6,
-                           '33511B': 20e6,
-                           '33512B': 20e6,
-                           '33250A': 80e6,
-                           '33522B': 30e6,
-                           '33622A': 120e6,
-                           '33510B': 20e6,
-                          }
+        self._max_freqs = {
+            "33210A": 10e6,
+            "33511B": 20e6,
+            "33512B": 20e6,
+            "33250A": 80e6,
+            "33522B": 30e6,
+            "33622A": 120e6,
+            "33510B": 20e6,
+        }
 
         self.num_channels = no_of_channels[self.model]
 
@@ -417,9 +421,9 @@ class Keysight33xxx(KeysightErrorQueueMixin, VisaInstrument):
         sync = Keysight33xxxSyncChannel(self, "sync")
         self.add_submodule("sync", sync)
 
-        self.add_function('force_trigger', call_cmd='*TRG')
+        self.add_function("force_trigger", call_cmd="*TRG")
 
-        self.add_function('sync_channel_phases', call_cmd='PHAS:SYNC')
+        self.add_function("sync_channel_phases", call_cmd="PHAS:SYNC")
 
         if not silent:
             self.connect_message()

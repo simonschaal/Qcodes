@@ -52,6 +52,7 @@ def setup_measurement_instances(
 
     Returns:
         A list of Measurement objects
+
     """
     measurements: list[Measurement] = []
     for ds_def in dataset_definitions:
@@ -90,14 +91,17 @@ def datasaver_builder(
 
     Yields:
         A list of generated datasavers with parameters registered
+
     """
 
     measurement_instances = setup_measurement_instances(
         dataset_definitions, override_experiment
     )
-    with TRACER.start_as_current_span(
-        "qcodes.dataset.datasaver_builder"
-    ), catch_interrupts() as _, ExitStack() as stack:
+    with (
+        TRACER.start_as_current_span("qcodes.dataset.datasaver_builder"),
+        catch_interrupts() as _,
+        ExitStack() as stack,
+    ):
         datasaver_builder_span = trace.get_current_span()
         datasavers = [
             stack.enter_context(measurement.run(parent_span=datasaver_builder_span))
@@ -119,6 +123,7 @@ def parse_dond_into_args(
             callables
 
     Returns:
+        A tuple of the list of sweeps to perform and a list of the parameters to measure.
 
     """
     sweep_instances: list[AbstractSweep] = []
@@ -162,6 +167,7 @@ def dond_into(
 
         additional_setpoints: A list of setpoint parameters to be registered in the
             measurement but not scanned/swept-over.
+
     """
     # at this stage multiple measurement context managers may be in run state
     # as datasavers. Here we ensure we bind the parent span to the correct

@@ -16,7 +16,7 @@ if TYPE_CHECKING:
     import qcodes.instrument_drivers.Keysight.keysightb1500
 
 
-_FMTResponse = namedtuple('_FMTResponse', 'value status channel type')
+_FMTResponse = namedtuple("_FMTResponse", "value status channel type")
 
 
 class MeasurementNotTaken(Exception):
@@ -33,9 +33,10 @@ def fmt_response_base_parser(raw_data_val: str) -> _FMTResponse:
 
     Args:
         raw_data_val: Unparsed (raw) data for the instrument.
+
     """
 
-    values_separator = ','
+    values_separator = ","
     data_val = []
     data_status = []
     data_channel = []
@@ -67,6 +68,7 @@ def parse_module_query_response(response: str) -> dict[SlotNr, str]:
 
     Returns:
         Dictionary from slot numbers to model name strings.
+
     """
     pattern = r";?(?P<model>\w+),(?P<revision>\d+)"
 
@@ -94,6 +96,7 @@ def parse_dcv_measurement_response(response: str) -> dict[str, str | float]:
 
     Args:
         response: Response str to lrn_query For the MFCMU.
+
     """
 
     match = re.match(_pattern_lrn, response)
@@ -130,6 +133,7 @@ def parse_spot_measurement_response(response: str) -> SpotResponse:
     Returns:
         Dictionary with measured value and associated metadata (e.g.
         timestamp, channel number, etc.)
+
     """
     match = re.match(_pattern, response)
     if match is None:
@@ -141,13 +145,13 @@ def parse_spot_measurement_response(response: str) -> SpotResponse:
         value=_convert_to_nan_if_dummy_value(float(dd["value"])),
         status=MeasurementStatus[dd["status"]],
         channel=ChannelName[dd["channel"]],
-        dtype=dd["dtype"]
+        dtype=dd["dtype"],
     )
 
     return d
 
 
-_DCORRResponse = namedtuple('_DCORRResponse', 'mode primary secondary')
+_DCORRResponse = namedtuple("_DCORRResponse", "mode primary secondary")
 
 
 def parse_dcorr_query_response(response: str) -> _DCORRResponse:
@@ -156,10 +160,12 @@ def parse_dcorr_query_response(response: str) -> _DCORRResponse:
     :class:`constants.DCORR.Mode` and primary and secondary reference or
     calibration values.
     """
-    mode, primary, secondary = response.split(',')
-    return _DCORRResponse(mode=constants.DCORR.Mode(int(mode)),
-                          primary=float(primary),
-                          secondary=float(secondary))
+    mode, primary, secondary = response.split(",")
+    return _DCORRResponse(
+        mode=constants.DCORR.Mode(int(mode)),
+        primary=float(primary),
+        secondary=float(secondary),
+    )
 
 
 def fixed_negative_float(response: str) -> float:
@@ -167,12 +173,12 @@ def fixed_negative_float(response: str) -> float:
     Keysight sometimes responds for ex. '-0.-1' as an output when you input
     '-0.1'. This function can convert such strings also to float.
     """
-    if len(response.split('.')) > 2:
-        raise ValueError('String must of format `a` or `a.b`')
+    if len(response.split(".")) > 2:
+        raise ValueError("String must of format `a` or `a.b`")
 
-    parts = response.split('.')
+    parts = response.split(".")
     number = parts[0]
-    decimal = parts[1] if len(parts) > 1 else '0'
+    decimal = parts[1] if len(parts) > 1 else "0"
 
     decimal = decimal.replace("-", "")
 
@@ -182,12 +188,11 @@ def fixed_negative_float(response: str) -> float:
 
 _dcorr_labels_units_map = {
     constants.DCORR.Mode.Cp_G: dict(
-        primary=dict(label='Cp', unit='F'),
-        secondary=dict(label='G', unit='S')
+        primary=dict(label="Cp", unit="F"), secondary=dict(label="G", unit="S")
     ),
     constants.DCORR.Mode.Ls_Rs: dict(
-        primary=dict(label='Ls', unit='H'),
-        secondary=dict(label='Rs', unit='Ω'))
+        primary=dict(label="Ls", unit="H"), secondary=dict(label="Rs", unit="Ω")
+    ),
 }
 
 
@@ -197,8 +202,8 @@ def format_dcorr_response(r: _DCORRResponse) -> str:
     ``DCORR?`` command as a human-readable string.
     """
     labels_units = _dcorr_labels_units_map[r.mode]
-    primary = labels_units['primary']
-    secondary = labels_units['secondary']
+    primary = labels_units["primary"]
+    secondary = labels_units["secondary"]
 
     result_str = (
         f"Mode: {r.mode.name}, "
@@ -209,21 +214,18 @@ def format_dcorr_response(r: _DCORRResponse) -> str:
 
 
 def get_name_label_unit_of_impedance_model(
-        mode: constants.IMP.MeasurementMode
+    mode: constants.IMP.MeasurementMode,
 ) -> tuple[tuple[str, str], tuple[str, str], tuple[str, str]]:
-    params = mode.name.split('_')
+    params = mode.name.split("_")
 
     param1 = params[0]
-    param2 = '_'.join(params[1:])
+    param2 = "_".join(params[1:])
 
-    label = (constants.IMP.Name[param1].value,
-             constants.IMP.Name[param2].value)
+    label = (constants.IMP.Name[param1].value, constants.IMP.Name[param2].value)
 
-    unit = (constants.IMP.Unit[param1].value,
-            constants.IMP.Unit[param2].value)
+    unit = (constants.IMP.Unit[param1].value, constants.IMP.Unit[param2].value)
 
-    name = (label[0].lower().replace(' ', '_'),
-            label[1].lower().replace(' ', '_'))
+    name = (label[0].lower().replace(" ", "_"), label[1].lower().replace(" ", "_"))
 
     return name, label, unit
 
@@ -237,8 +239,7 @@ def get_measurement_summary(status_array: np.ndarray) -> str:
     unique_error_statuses = np.unique(status_array[status_array != "N"])
     if len(unique_error_statuses) > 0:
         summary = " ".join(
-            constants.MeasurementStatus[err] for err in
-            unique_error_statuses
+            constants.MeasurementStatus[err] for err in unique_error_statuses
         )
     else:
         summary = constants.MeasurementStatus["N"]
@@ -263,7 +264,7 @@ def convert_dummy_val_to_nan(param: _FMTResponse) -> None:
 
 
 def _convert_to_nan_if_dummy_value(value: float) -> float:
-    return float('nan') if value > 1e99 else value
+    return float("nan") if value > 1e99 else value
 
 
 class KeysightB1500Module(InstrumentChannel):
@@ -282,7 +283,9 @@ class KeysightB1500Module(InstrumentChannel):
             (Default), then the name is autogenerated from the instrument
             class.
         slot_nr: Slot number of this module (not channel number)
+
     """
+
     MODULE_KIND: ModuleKind
 
     def __init__(
@@ -334,20 +337,18 @@ class KeysightB1500Module(InstrumentChannel):
         Returns:
             `True` if *all* channels of this module are enabled. `False`,
             otherwise.
+
         """
         # TODO If a module has multiple channels, and only one is enabled, then
         # this will return false, which is probably not desirable.
         # Also check the TODO item at the top about InstrumentChannel per
         # Channel instead of per Module.
-        msg = (MessageBuilder()
-               .lrn_query(constants.LRN.Type.OUTPUT_SWITCH)
-               .message
-               )
+        msg = MessageBuilder().lrn_query(constants.LRN.Type.OUTPUT_SWITCH).message
         response = self.ask(msg)
         activated_channels = re.sub(r"[^,\d]", "", response).split(",")
 
         is_enabled = set(self.channels).issubset(
-            int(x) for x in activated_channels if x != ''
+            int(x) for x in activated_channels if x != ""
         )
         return is_enabled
 
@@ -368,7 +369,7 @@ class B1500Module(KeysightB1500Module):
 
 class StatusMixin:
     def __init__(self) -> None:
-        self.names = tuple(['param1', 'param2'])
+        self.names = tuple(["param1", "param2"])
 
     def status_summary(self) -> dict[str, str]:
         return_dict: dict[str, str] = {}

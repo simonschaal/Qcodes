@@ -1,4 +1,4 @@
-from typing import TYPE_CHECKING, Any, ClassVar, Optional, TypedDict, cast
+from typing import TYPE_CHECKING, Any, ClassVar, TypedDict, cast
 
 import numpy as np
 
@@ -36,7 +36,7 @@ class DataArray7510(MultiParameter):
         self,
         names: "Sequence[str]",
         shapes: "Sequence[Sequence[int]]",
-        setpoints: Optional["Sequence[Sequence[Any]]"],
+        setpoints: "Sequence[Sequence[Any]] | None",
         **kwargs: Any,
     ):
         super().__init__(
@@ -282,7 +282,7 @@ class Keithley7510Buffer(InstrumentChannel):
         self,
         exception_type: type[BaseException] | None,
         value: BaseException | None,
-        traceback: Optional["TracebackType"],
+        traceback: "TracebackType | None",
     ) -> None:
         self.delete()
 
@@ -385,7 +385,8 @@ class Keithley7510Buffer(InstrumentChannel):
             setpoint_names=((self.setpoints.label,),) * n_elements,
         )
         data._data = tuple(
-            tuple(processed_data[element]) for element in elements  # type: ignore[arg-type]
+            tuple(processed_data[element])  # type: ignore[arg-type]
+            for element in elements
         )
         for i in range(len(data.names)):
             setattr(data, data.names[i], tuple(processed_data[data.names[i]]))  # type: ignore[arg-type]
@@ -478,6 +479,7 @@ class Keithley7510Sense(InstrumentChannel):
                 "resistance" is for two-wire measurement of resistance.
                 "Fresistance" is for Four-wire measurement of resistance.
             **kwargs: Forwarded to base class.
+
         """
         super().__init__(parent, name, **kwargs)
 
@@ -648,7 +650,6 @@ class Keithley7510DigitizeSense(InstrumentChannel):
     }
 
     def __init__(self, parent: VisaInstrument, name: str, proper_function: str) -> None:
-
         super().__init__(parent, name)
 
         self._proper_function = proper_function
@@ -740,6 +741,7 @@ class Keithley7510(VisaInstrument):
             name: Name of the instrument instance
             address: Visa-resolvable instrument address
             **kwargs: kwargs are forwarded to base class.
+
         """
         super().__init__(name, address, **kwargs)
 

@@ -3,6 +3,7 @@ Module for specialized parameters. The :mod:`qcodes.instrument.parameter`
 module provides generic parameters for different generic cases. This module
 provides useful/convenient specializations of such generic parameters.
 """
+
 from __future__ import annotations
 
 from time import perf_counter
@@ -27,10 +28,10 @@ class ElapsedTimeParameter(Parameter):
     Args:
         name: The local name of the parameter. See the documentation of
             :class:`qcodes.parameters.Parameter` for more details.
+
     """
 
     def __init__(self, name: str, label: str = "Elapsed time", **kwargs: Any):
-
         hardcoded_kwargs = ["unit", "get_cmd", "set_cmd"]
 
         for hck in hardcoded_kwargs:
@@ -71,6 +72,7 @@ class InstrumentRefParameter(Parameter):
             and cannot be set after initiation.
 
         **kwargs: Passed to InstrumentRefParameter parent class
+
     """
 
     def __init__(

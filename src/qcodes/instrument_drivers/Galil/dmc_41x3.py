@@ -45,6 +45,7 @@ class GalilMotionController(Instrument):
             name: name for the instrument
             address: address of the controller
             **kwargs: kwargs are forwarded to base class.
+
         """
         super().__init__(name=name, **kwargs)
         self.g = gclib.py()
@@ -95,6 +96,7 @@ class GalilMotionController(Instrument):
 
         Args:
             val: time in milliseconds. -1 disables the timeout
+
         """
         if val < -1:
             raise RuntimeError("Timeout value cannot be set less than -1")
@@ -133,6 +135,7 @@ class GalilDMC4133VectorMode(InstrumentChannel):
             parent: an instance of DMC4133Controller
             name: name of the vector mode plane
             **kwargs: kwargs are forwarded to base class.
+
         """
         super().__init__(parent, name, **kwargs)
         self._plane = name
@@ -269,6 +272,7 @@ class GalilDMC4133Motor(InstrumentChannel):
             parent: an instance of DMC4133Controller
             name: name of the motor to be controlled
             **kwargs: kwargs are forwarded to base class.
+
         """
         super().__init__(parent, name, **kwargs)
         self._axis = name
@@ -487,6 +491,7 @@ class GalilDMC4133Controller(GalilMotionController):
             name: name for the instance
             address: address of the controller burned in
             **kwargs: kwargs are forwarded to base class.
+
         """
         super().__init__(name=name, address=address, **kwargs)
 
@@ -636,6 +641,7 @@ class GalilDMC4133Arm:
 
         Args:
             controller: an instance of DMC4133Controller
+
         """
         self.controller = controller
 
@@ -738,28 +744,24 @@ class GalilDMC4133Arm:
         self._arm_pick_up_distance = _convert_micro_meter_to_quadrature_counts(distance)
 
     def set_left_bottom_position(self) -> None:
-
         pos = self.controller.absolute_position()
         self._left_bottom_position = (pos["A"], pos["B"], pos["C"])
 
         self._calculate_ortho_vector()
 
     def set_left_top_position(self) -> None:
-
         pos = self.controller.absolute_position()
         self._left_top_position = (pos["A"], pos["B"], pos["C"])
 
         self._calculate_ortho_vector()
 
     def set_right_top_position(self) -> None:
-
         pos = self.controller.absolute_position()
         self._right_top_position = (pos["A"], pos["B"], pos["C"])
 
         self._calculate_ortho_vector()
 
     def _calculate_ortho_vector(self) -> None:
-
         if (
             self._left_bottom_position is None
             or self._left_top_position is None
@@ -953,7 +955,6 @@ class GalilDMC4133Arm:
         self.controller.wait_till_motion_complete()
 
     def _pick_up(self) -> None:
-
         self.move_motor_c_by(distance=-20)
         self._setup_motion(
             rel_vec=self._n, d=self._arm_pick_up_distance, speed=self._speed
@@ -961,7 +962,6 @@ class GalilDMC4133Arm:
         self._move()
 
     def _put_down(self) -> None:
-
         motion_vec = -1 * self._n
 
         pos = self.controller.absolute_position()
@@ -979,7 +979,6 @@ class GalilDMC4133Arm:
         self._move()
 
     def move_towards_left_bottom_position(self) -> None:
-
         self._pick_up()
 
         motion_vec = -1 * self._a
@@ -991,7 +990,6 @@ class GalilDMC4133Arm:
         self._current_pad = 1
 
     def move_to_next_row(self) -> None:
-
         if self._current_row is None or self._current_pad is None:
             raise RuntimeError("Current position unknown.")
 
@@ -1010,7 +1008,6 @@ class GalilDMC4133Arm:
         self._current_row = self._current_row + 1
 
     def move_to_begin_row_pad_from_end_row_last_pad(self) -> None:
-
         if self._current_row is None or self._current_pad is None:
             raise RuntimeError("Current position unknown.")
 
@@ -1032,7 +1029,6 @@ class GalilDMC4133Arm:
         self._current_pad = self._current_pad + 1
 
     def move_to_row(self, num: int) -> None:
-
         if num < 1 or num > self.rows:
             raise RuntimeError(
                 f"Row num: {num} is out of range. Row numbers start from 1 "
@@ -1062,7 +1058,6 @@ class GalilDMC4133Arm:
         self._current_row = num
 
     def move_to_pad(self, num: int) -> None:
-
         if num < 1 or num > self.pads:
             raise RuntimeError(
                 f"Pad num: {num} is out of range. Pad number start from 1 "
@@ -1092,38 +1087,31 @@ class GalilDMC4133Arm:
         self._current_pad = num
 
     def set_motor_a_forward_limit(self) -> None:
-
         pos = self.controller.absolute_position()
         self.controller.motor_a.forward_sw_limit(pos["A"])
 
     def set_motor_a_reverse_limit(self) -> None:
-
         pos = self.controller.absolute_position()
         self.controller.motor_a.reverse_sw_limit(pos["A"])
 
     def set_motor_b_forward_limit(self) -> None:
-
         pos = self.controller.absolute_position()
         self.controller.motor_b.forward_sw_limit(pos["B"])
 
     def set_motor_b_reverse_limit(self) -> None:
-
         pos = self.controller.absolute_position()
         self.controller.motor_b.reverse_sw_limit(pos["B"])
 
     def set_motor_c_forward_limit(self) -> None:
-
         pos = self.controller.absolute_position()
         self.controller.motor_c.forward_sw_limit(pos["C"])
 
     def set_motor_c_reverse_limit(self) -> None:
-
         pos = self.controller.absolute_position()
         self.controller.motor_c.reverse_sw_limit(pos["C"])
 
 
 def _convert_micro_meter_to_quadrature_counts(val: float) -> int:
-
     return int(20 * val)
 
 

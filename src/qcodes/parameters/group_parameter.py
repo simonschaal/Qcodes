@@ -3,6 +3,7 @@ This module implements a :class:`.Group` intended to hold multiple
 parameters that are to be gotten and set by the same command. The parameters
 should be of type :class:`GroupParameter`
 """
+
 from __future__ import annotations
 
 from collections import OrderedDict
@@ -44,6 +45,7 @@ class GroupParameter(Parameter):
 
         **kwargs: All kwargs used by the :class:`.Parameter` class, except
              ``set_cmd`` and ``get_cmd``.
+
     """
 
     def __init__(
@@ -53,7 +55,6 @@ class GroupParameter(Parameter):
         initial_value: float | int | str | None = None,
         **kwargs: Any,
     ) -> None:
-
         if "set_cmd" in kwargs or "get_cmd" in kwargs:
             raise ValueError(
                 "A GroupParameter does not use 'set_cmd' or 'get_cmd' kwarg"
@@ -160,6 +161,7 @@ class Group:
             individual parsing of their values).
         single_instrument: A flag to indicate that all parameters belong to a
         single instrument, which in turn does additional checks. Defaults to True.
+
     """
 
     def __init__(
@@ -239,6 +241,7 @@ class Group:
         Args:
             parameters_dict: The dictionary of one or more parameters within
             the group with the corresponding values to be set.
+
         """
         if not parameters_dict:
             raise RuntimeError(
@@ -264,6 +267,7 @@ class Group:
         Args:
             set_parameter: The parameter within the group to set.
             raw_value: The new raw_value for this parameter.
+
         """
         # TODO replace get latest with call to cache.invalid once that lands
         if any((p.get_latest() is None) for p in self.parameters.values()):

@@ -1,5 +1,6 @@
 import re
-from typing import TYPE_CHECKING, Any, ClassVar, Literal, Optional, Union
+from pathlib import Path
+from typing import TYPE_CHECKING, Any, ClassVar, Literal
 
 import numpy as np
 from pyvisa import VisaIOError
@@ -101,7 +102,7 @@ class DSOTraceParam(ParameterWithSetpoints):
     def __init__(
         self,
         name: str,
-        instrument: Union["KeysightInfiniiumChannel", "KeysightInfiniiumFunction"],
+        instrument: "KeysightInfiniiumChannel | KeysightInfiniiumFunction",
         channel: str,
         **kwargs: Any,
     ):
@@ -169,7 +170,7 @@ class DSOTraceParam(ParameterWithSetpoints):
         """
         return
 
-    def update_setpoints(self, preamble: Optional["Sequence[str]"] = None) -> None:
+    def update_setpoints(self, preamble: "Sequence[str] | None" = None) -> None:
         """
         Update waveform parameters. Must be called before data
         acquisition if instr.cache_setpoints is False
@@ -465,7 +466,7 @@ class AbstractMeasurementSubsystem(InstrumentModule):
 class KeysightInfiniiumBoundMeasurement(AbstractMeasurementSubsystem):
     def __init__(
         self,
-        parent: Union["KeysightInfiniiumChannel", "KeysightInfiniiumFunction"],
+        parent: "KeysightInfiniiumChannel | KeysightInfiniiumFunction",
         name: str,
         **kwargs: "Unpack[InstrumentBaseKWArgs]",
     ):
@@ -838,6 +839,7 @@ class KeysightInfiniium(VisaInstrument):
             channels: The number of channels on the scope.
             silence_pyvisapy_warning: Don't warn about pyvisa-py at startup
             **kwargs: kwargs are forwarded to base class.
+
         """
         super().__init__(name, address, **kwargs)
         self.connect_message()
@@ -1254,6 +1256,46 @@ class KeysightInfiniium(VisaInstrument):
             self.device_clear()
             if timeout is not None:
                 self.visa_handle.timeout = old_timeout
+
+    def screenshot(
+        self,
+        path: str | Path = "./screenshot",
+        with_time: bool = False,
+        time_fmt: str = "%Y-%m-%d_%H-%M-%S",
+        divider: str = "_",
+    ) -> np.ndarray | None:
+        """Save screen to {path} with {image_type}: bmp, jpg, gif, tif, png
+
+        return np.array if sucessfully saved, else return None
+        """
+        from datetime import datetime
+        from io import BytesIO
+        from os.path import splitext
+
+        from PIL.Image import open as pil_open
+
+        if isinstance(path, Path):
+            path = str(path)
+
+        time_str = datetime.now().strftime(time_fmt) if with_time else ""
+        img_name, img_type = splitext(path)
+        img_path = (
+            f"{img_name}{divider if with_time else ''}{time_str}{img_type.lower()}"
+        )
+        try:
+            with open(img_path, "wb") as f:
+                screen_bytes = self.visa_handle.query_binary_values(
+                    f":DISPlay:DATA? {img_type.upper()[1:]}",  # without .
+                    # https://docs.python.org/3/library/struct.html#format-characters
+                    datatype="B",  # Capitcal B for unsigned byte
+                    container=bytes,
+                )
+                f.write(screen_bytes)  # type: ignore[arg-type]
+            print(f"Screen image written to {img_path}")
+            return np.asarray(pil_open(BytesIO(screen_bytes)))  # type: ignore[arg-type]
+        except Exception as e:
+            self.log.error(f"Failed to save screenshot, Error occurred: \n{e}")
+            return None
 
 
 Infiniium = KeysightInfiniium

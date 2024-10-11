@@ -42,7 +42,6 @@ class ParameterWithSetpoints(Parameter):
         snapshot_value: bool = False,
         **kwargs: Any,
     ) -> None:
-
         if not isinstance(vals, Arrays):
             raise ValueError(
                 f"A ParameterWithSetpoints must have an Arrays "
@@ -174,6 +173,7 @@ def expand_setpoints_helper(
     Returns:
         A list of tuples of parameters and values for the specified parameter
         and its setpoints.
+
     """
     if not isinstance(parameter, ParameterWithSetpoints):
         raise TypeError(

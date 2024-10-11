@@ -115,7 +115,8 @@ class RigolDG1062Burst(InstrumentChannel):
             get_cmd=f":SOUR{channel}:BURST:IDLE?",
             set_cmd=f":SOUR{channel}:BURST:IDLE {{}}",
             vals=vals.MultiType(
-                vals.Enum("FPT", "TOP", "BOTTOM", "CENTER"), vals.Numbers()  # DIY
+                vals.Enum("FPT", "TOP", "BOTTOM", "CENTER"),
+                vals.Numbers(),  # DIY
             ),
         )
         """Parameter idle"""
@@ -129,7 +130,6 @@ class RigolDG1062Burst(InstrumentChannel):
 
 
 class RigolDG1062Channel(InstrumentChannel):
-
     min_impedance = 1
     max_impedance = 10000
 
@@ -171,6 +171,7 @@ class RigolDG1062Channel(InstrumentChannel):
             name: Name of the channel.
             channel: Number of the channel.
             **kwargs: Forwarded to base class.
+
         """
 
         super().__init__(parent, name, **kwargs)

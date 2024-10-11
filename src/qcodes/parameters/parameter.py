@@ -165,6 +165,7 @@ class Parameter(ParameterBase):
 
         bind_to_instrument: Should the parameter be registered as a delegate attribute
             on the instrument passed via the instrument argument.
+
     """
 
     def __init__(
@@ -216,7 +217,6 @@ class Parameter(ParameterBase):
             existing_parameter = instrument.parameters.get(name, None)
 
             if existing_parameter:
-
                 # this check is redundant since its also in the baseclass
                 # but if we do not put it here it would be an api break
                 # as parameter duplication check won't be done first,
@@ -405,6 +405,7 @@ class Parameter(ParameterBase):
 
         Args:
             value: Value to be added to the parameter.
+
         """
         self.set(self.get() + value)
 
@@ -437,6 +438,7 @@ class Parameter(ParameterBase):
             [5.0, 6.0, 7.0, 8.0, 9.0, 10.0]
             >>> sweep(15, 10.5, step=1.5)
             >[15.0, 13.5, 12.0, 10.5]
+
         """
         return SweepFixedValues(self, start=start, stop=stop, step=step, num=num)
 

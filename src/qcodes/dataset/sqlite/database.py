@@ -3,6 +3,7 @@ This module provides means of connecting to a QCoDeS database file and
 initialising it. Note that connecting/initialisation take into account
 database version and possibly perform database upgrades.
 """
+
 from __future__ import annotations
 
 import io
@@ -102,6 +103,7 @@ def _convert_numeric(value: bytes) -> float | int | str:
     else:
         return numeric_int
 
+
 def _adapt_float(fl: float) -> float | str:
     # For a single value, math.isnan is 10 times faster than np.isnan
     # Overall, saving floats with numeric format is 2 times faster with math.isnan
@@ -139,17 +141,20 @@ def connect(name: str | Path, debug: bool = False, version: int = -1) -> Connect
     # register binary(TEXT) -> numpy converter
     sqlite3.register_converter("array", _convert_array)
 
-    sqlite3_conn = sqlite3.connect(name, detect_types=sqlite3.PARSE_DECLTYPES,
-                                   check_same_thread=True)
+    sqlite3_conn = sqlite3.connect(
+        name, detect_types=sqlite3.PARSE_DECLTYPES, check_same_thread=True
+    )
     conn = ConnectionPlus(sqlite3_conn)
 
     latest_supported_version = _latest_available_version()
     db_version = get_user_version(conn)
 
     if db_version > latest_supported_version:
-        raise RuntimeError(f"Database {name} is version {db_version} but this "
-                           f"version of QCoDeS supports up to "
-                           f"version {latest_supported_version}")
+        raise RuntimeError(
+            f"Database {name} is version {db_version} but this "
+            f"version of QCoDeS supports up to "
+            f"version {latest_supported_version}"
+        )
 
     # Make sure numpy ints and floats types are inserted properly
     for numpy_int in numpy_ints:
@@ -186,6 +191,7 @@ def get_db_version_and_newest_available_version(
 
     Returns:
         A tuple of (db_version, latest_available_version)
+
     """
     conn = connect(path_to_db, version=0)
     db_version = get_user_version(conn)
@@ -214,6 +220,7 @@ def initialise_database(journal_mode: JournalMode | None = "WAL") -> None:
         journal_mode: Which `journal_mode` should be used for atomic commit and rollback.
             Options are DELETE, TRUNCATE, PERSIST, MEMORY, WAL and OFF. If set to None
             no changes are made.
+
     """
     # calling connect performs all the needed actions to create and upgrade
     # the db to the latest version.
@@ -234,11 +241,14 @@ def set_journal_mode(conn: ConnectionPlus, journal_mode: JournalMode) -> None:
         conn: Connection to the database.
         journal_mode: Which `journal_mode` should be used for atomic commit and rollback.
             Options are DELETE, TRUNCATE, PERSIST, MEMORY, WAL and OFF.
+
     """
     valid_journal_modes = ["DELETE", "TRUNCATE", "PERSIST", "MEMORY", "WAL", "OFF"]
     if journal_mode not in valid_journal_modes:
-        raise RuntimeError(f"Invalid journal_mode {journal_mode} "
-                           f"Valid modes are {valid_journal_modes}")
+        raise RuntimeError(
+            f"Invalid journal_mode {journal_mode} "
+            f"Valid modes are {valid_journal_modes}"
+        )
     query = f"PRAGMA journal_mode={journal_mode};"
     cursor = conn.cursor()
     cursor.execute(query)
@@ -257,6 +267,7 @@ def initialise_or_create_database_at(
         journal_mode: Which `journal_mode` should be used for atomic commit and rollback.
             Options are DELETE, TRUNCATE, PERSIST, MEMORY, WAL and OFF. If set to None
             no changes are made.
+
     """
     qcodes.config.core.db_location = str(db_file_with_abs_path)
     initialise_database(journal_mode)
@@ -270,6 +281,7 @@ def initialised_database_at(db_file_with_abs_path: str | Path) -> Iterator[None]
     Args:
         db_file_with_abs_path: Database file name with absolute path, for example
             ``C:\\mydata\\majorana_experiments.db``
+
     """
     db_location = qcodes.config["core"]["db_location"]
     try:
@@ -294,11 +306,14 @@ def conn_from_dbpath_or_conn(
 
     Returns:
         A `ConnectionPlus` object
+
     """
 
     if path_to_db is not None and conn is not None:
-        raise ValueError('Received BOTH conn and path_to_db. Please '
-                         'provide only one or the other.')
+        raise ValueError(
+            "Received BOTH conn and path_to_db. Please "
+            "provide only one or the other."
+        )
     if conn is None and path_to_db is None:
         path_to_db = get_DB_location()
 
@@ -308,6 +323,5 @@ def conn_from_dbpath_or_conn(
         pass
     else:
         # this should be impossible but left here to keep mypy happy.
-        raise RuntimeError("Could not obtain a connection from"
-                           "supplied information.")
+        raise RuntimeError("Could not obtain a connection from supplied information.")
     return conn

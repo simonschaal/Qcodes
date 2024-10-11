@@ -15,7 +15,6 @@ if TYPE_CHECKING:
 
 
 class KeysightB2962AChannel(InstrumentChannel):
-
     def __init__(
         self,
         parent: Instrument,
@@ -32,6 +31,7 @@ class KeysightB2962AChannel(InstrumentChannel):
             name: The name of the channel
             chan: The number of the channel in question (1-2)
             **kwargs: Forwarded to base class.
+
         """
         # Sanity Check inputs
         if name not in ["ch1", "ch2"]:
@@ -141,6 +141,7 @@ class KeysightB2962A(VisaInstrument):
         - Implement any remaining parameters supported by the device
         - Similar drivers have special handlers to map return values of
           9.9e+37 to inf, is this needed?
+
     """
 
     default_terminator = "\n"
@@ -159,11 +160,14 @@ class KeysightB2962A(VisaInstrument):
         self.connect_message()
 
     def get_idn(self) -> dict[str, str | None]:
-        IDN_str = self.ask_raw('*IDN?')
-        vendor, model, serial, firmware = map(str.strip, IDN_str.split(','))
+        IDN_str = self.ask_raw("*IDN?")
+        vendor, model, serial, firmware = map(str.strip, IDN_str.split(","))
         IDN: dict[str, str | None] = {
-            'vendor': vendor, 'model': model,
-            'serial': serial, 'firmware': firmware}
+            "vendor": vendor,
+            "model": model,
+            "serial": serial,
+            "firmware": firmware,
+        }
         return IDN
 
 

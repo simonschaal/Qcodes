@@ -106,10 +106,12 @@ def get_instrument_logger(
     Returns:
         :class:`logging.LoggerAdapter` instance, that can be used for instrument
         specific logging.
+
     """
-    logger_name = logger_name or ''
-    return InstrumentLoggerAdapter(logging.getLogger(logger_name),
-                                   {'instrument': instrument_instance})
+    logger_name = logger_name or ""
+    return InstrumentLoggerAdapter(
+        logging.getLogger(logger_name), {"instrument": instrument_instance}
+    )
 
 
 @contextmanager
@@ -134,14 +136,17 @@ def filter_instrument(
             messages from.
         level: Level to set the handlers to.
         handler: Single or sequence of handlers to change.
+
     """
     handlers: Sequence[logging.Handler]
     if handler is None:
         myhandler = get_console_handler()
         if myhandler is None:
-            raise RuntimeError("Trying to filter instrument but no handler "
-                               "defined. Did you forget to call "
-                               "`start_logger` before?")
+            raise RuntimeError(
+                "Trying to filter instrument but no handler "
+                "defined. Did you forget to call "
+                "`start_logger` before?"
+            )
         handlers = (myhandler,)
     elif not isinstance(handler, collections.abc.Sequence):
         handlers = (handler,)

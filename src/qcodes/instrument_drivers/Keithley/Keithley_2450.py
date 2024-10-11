@@ -1,4 +1,4 @@
-from typing import TYPE_CHECKING, Any, ClassVar, Optional, cast
+from typing import TYPE_CHECKING, Any, ClassVar, cast
 
 import numpy as np
 from typing_extensions import TypedDict, Unpack
@@ -138,7 +138,7 @@ class Keithley2450Buffer(InstrumentChannel):
         self,
         exception_type: type[BaseException] | None,
         value: BaseException | None,
-        traceback: Optional["TracebackType"],
+        traceback: "TracebackType | None",
     ) -> None:
         self.delete()
 
@@ -211,6 +211,7 @@ class _FunctionMode(TypedDict):
     unit: str
     range_vals: Numbers
 
+
 class Keithley2450Sense(InstrumentChannel):
     """
     The sense module of the Keithley 2450 SMU.
@@ -224,6 +225,7 @@ class Keithley2450Sense(InstrumentChannel):
             self.parent.sense_function.get() == self._proper_function. We
             ensure this through the 'sense' property on the main driver class
             which returns the proper submodule for any given function mode
+
     """
 
     function_modes: ClassVar[dict[str, _FunctionMode]] = {
@@ -337,7 +339,6 @@ class Keithley2450Sense(InstrumentChannel):
         return float(self.ask(f":MEASure? '{buffer_name}'"))
 
     def _measure_sweep(self) -> np.ndarray:
-
         source = cast(Keithley2450Source, self.parent.source)
         source.sweep_start()
         buffer_name = self.parent.buffer_name()
@@ -390,6 +391,7 @@ class Keithley2450Source(InstrumentChannel):
             self.parent.source_function.get() == self._proper_function. We
             ensure this through the 'source' property on the main driver class
             which returns the proper submodule for any given function mode
+
     """
 
     function_modes: ClassVar[dict[str, _FunctionMode]] = {
@@ -539,7 +541,6 @@ class Keithley2450Source(InstrumentChannel):
         dual: str = "OFF",
         buffer_name: str = "defbuffer1",
     ) -> None:
-
         self._sweep_arguments = _SweepDict(
             start=start,
             stop=stop,

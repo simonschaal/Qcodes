@@ -84,6 +84,7 @@ class LinSweep(AbstractSweep[np.float64]):
         post_actions: Actions to do after each sweep point.
         get_after_set: Should we perform a get on the parameter after setting it
             and store the value returned by get rather than the set value in the dataset.
+
     """
 
     def __init__(
@@ -145,6 +146,7 @@ class LogSweep(AbstractSweep[np.float64]):
         post_actions: Actions to do after each sweep point.
         get_after_set: Should we perform a get on the parameter after setting it
             and store the value returned by get rather than the set value in the dataset.
+
     """
 
     def __init__(
@@ -204,6 +206,7 @@ class ArraySweep(AbstractSweep, Generic[T]):
         post_actions: Actions to do after each sweep point.
         get_after_set: Should we perform a get on the parameter after setting it
             and store the value returned by get rather than the set value in the dataset.
+
     """
 
     def __init__(
@@ -253,7 +256,6 @@ class TogetherSweep:
     """
 
     def __init__(self, *sweeps: AbstractSweep):
-
         if len(sweeps) == 0:
             raise ValueError("A TogetherSweep must contain at least one sweep.")
 

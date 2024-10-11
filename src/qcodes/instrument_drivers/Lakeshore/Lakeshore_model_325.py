@@ -89,6 +89,7 @@ class LakeshoreModel325Status(IntFlag):
     """
     IntFlag that defines status codes for Lakeshore Model 325
     """
+
     sensor_units_overrang = 128
     sensor_units_zero = 64
     temp_overrange = 32
@@ -121,6 +122,7 @@ class LakeshoreModel325Status(IntFlag):
                 byte array.  To request the native byte order of the host system, use
                 `sys.byteorder` as the byte order value.  Default is to use 'big'.
             signed: Indicates whether two\'s complement is used to represent the integer.
+
         """
         return super().from_bytes(bytes, byteorder, signed=signed)
 
@@ -146,6 +148,7 @@ class LakeshoreModel325Status(IntFlag):
             signed: Determines whether two\'s complement is used to represent the integer.
                 If signed is False and a negative integer is given, an OverflowError
                 is raised.
+
         """
         return super().to_bytes(length, byteorder, signed=signed)
 
@@ -278,6 +281,7 @@ class LakeshoreModel325Curve(InstrumentChannel):
                                 dictionary
             sensor_unit (str): If None, the data dict is validated and the
                                 units are extracted.
+
         """
         if sensor_unit is None:
             sensor_unit = self.validate_datadict(data_dict)
@@ -288,7 +292,6 @@ class LakeshoreModel325Curve(InstrumentChannel):
         for value_index, (temperature_value, sensor_value) in enumerate(
             zip(temperature_values, sensor_values)
         ):
-
             cmd_str = (
                 f"CRVPT {self._index}, {value_index + 1}, "
                 f"{sensor_value:3.3f}, {temperature_value:3.3f}"
@@ -305,6 +308,7 @@ class LakeshoreModel325Sensor(InstrumentChannel):
         parent (LakeshoreModel325): The instrument this heater belongs to
         name (str)
         inp (str): Either "A" or "B"
+
     """
 
     def __init__(
@@ -409,6 +413,7 @@ class LakeshoreModel325Heater(InstrumentChannel):
             name: Name of the Channel
             loop: Either 1 or 2
             **kwargs: Forwarded to baseclass.
+
         """
 
         if loop not in [1, 2]:
@@ -617,6 +622,7 @@ class LakeshoreModel325(VisaInstrument):
              name: Name of the curve
              serial_number: Serial number of the curve
              data_dict: A dictionary containing the curve data
+
         """
         if index not in range(21, 36):
             raise ValueError("index value should be between 21 and 35")

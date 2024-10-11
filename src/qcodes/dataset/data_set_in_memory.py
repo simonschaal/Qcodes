@@ -226,6 +226,7 @@ class DataSetInMem(BaseDataSet):
 
         Returns:
             The loaded dataset.
+
         """
         # in the code below floats and ints loaded from attributes are explicitly casted
         # this is due to some older versions of qcodes writing them with a different backend
@@ -233,7 +234,6 @@ class DataSetInMem(BaseDataSet):
         import xarray as xr
 
         with xr.open_dataset(path, engine="h5netcdf") as loaded_data:
-
             parent_dataset_links = str_to_links(
                 loaded_data.attrs.get("parent_dataset_links", "[]")
             )
@@ -303,7 +303,6 @@ class DataSetInMem(BaseDataSet):
 
     @classmethod
     def _load_from_db(cls, conn: ConnectionPlus, guid: str) -> DataSetInMem:
-
         run_attributes = get_raw_run_attributes(conn, guid)
         if run_attributes is None:
             raise RuntimeError(
@@ -342,7 +341,6 @@ class DataSetInMem(BaseDataSet):
 
     @classmethod
     def _set_cache_from_netcdf(cls, ds: DataSetInMem, xr_path: Path | None) -> bool:
-
         success = True
         if xr_path is not None and xr_path.is_file():
             ds._cache = DataSetCacheDeferred(ds, xr_path)
@@ -423,7 +421,7 @@ class DataSetInMem(BaseDataSet):
         if not self.pristine:
             raise RuntimeError("Cannot prepare a dataset that is not pristine.")
 
-        self.add_snapshot(json.dumps({"station": snapshot}, cls=NumpyJSONEncoder))
+        self.add_snapshot(json.dumps(snapshot, cls=NumpyJSONEncoder))
 
         if interdeps == InterDependencies_():
             raise RuntimeError("No parameters supplied")
@@ -563,6 +561,7 @@ class DataSetInMem(BaseDataSet):
         Args:
             snapshot: the raw JSON dump of the snapshot
             overwrite: force overwrite an existing snapshot
+
         """
         if self.snapshot is None or overwrite:
             self._add_to_dyn_column_if_in_db("snapshot", snapshot)
@@ -588,6 +587,7 @@ class DataSetInMem(BaseDataSet):
         Args:
             tag: represents the key in the metadata dictionary
             metadata: actual metadata
+
         """
 
         self._metadata[tag] = metadata
@@ -663,16 +663,16 @@ class DataSetInMem(BaseDataSet):
             all_params = inff_params.union(deps_params).union({toplevel_param})
 
             new_results[toplevel_param.name] = {}
-            new_results[toplevel_param.name][
-                toplevel_param.name
-            ] = self._reshape_array_for_cache(
-                toplevel_param, result_dict[toplevel_param]
+            new_results[toplevel_param.name][toplevel_param.name] = (
+                self._reshape_array_for_cache(
+                    toplevel_param, result_dict[toplevel_param]
+                )
             )
             for param in all_params:
                 if param is not toplevel_param:
-                    new_results[toplevel_param.name][
-                        param.name
-                    ] = self._reshape_array_for_cache(param, result_dict[param])
+                    new_results[toplevel_param.name][param.name] = (
+                        self._reshape_array_for_cache(param, result_dict[param])
+                    )
 
         # Finally, handle standalone parameters
 
@@ -698,6 +698,7 @@ class DataSetInMem(BaseDataSet):
 
         Args:
             links: The links to assign to this dataset
+
         """
         if not self.pristine:
             raise RuntimeError(
@@ -741,7 +742,6 @@ class DataSetInMem(BaseDataSet):
         return list(old_interdeps.paramspecs)
 
     def _complete(self, value: bool) -> None:
-
         with contextlib.closing(
             conn_from_dbpath_or_conn(conn=None, path_to_db=self._path_to_db)
         ) as conn:
@@ -899,6 +899,7 @@ def load_from_netcdf(
 
     Returns:
         The loaded dataset.
+
     """
     return DataSetInMem._load_from_netcdf(path=path, path_to_db=path_to_db)
 
@@ -920,6 +921,7 @@ def load_from_file(
 
     Returns:
         The loaded dataset.
+
     """
     path = Path(path)
     if not path.is_file():

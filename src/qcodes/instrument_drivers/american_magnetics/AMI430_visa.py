@@ -198,8 +198,6 @@ class AMI430SwitchHeater(InstrumentChannel):
 
 
 class AMIModel430(VisaInstrument):
-
-
     _SHORT_UNITS: ClassVar[dict[str, str]] = {
         "seconds": "s",
         "minutes": "min",
@@ -236,6 +234,7 @@ class AMIModel430(VisaInstrument):
             reset: Should the reset method be called on the instrument at init time
             current_ramp_limit: A current ramp limit, in units of A/s
             **kwargs: Additional kwargs are passed to the base class
+
         """
         if "has_current_rating" in kwargs.keys():
             warnings.warn(
@@ -457,6 +456,7 @@ class AMIModel430(VisaInstrument):
             perform_safety_check: Whether to set the field via a parent
                 driver (if present), which might perform additional safety
                 checks.
+
         """
         # Check we aren't violating field limits
         field_lim = float(self.ask("COIL?")) * self.current_limit()
@@ -500,7 +500,6 @@ class AMIModel430(VisaInstrument):
             raise AMI430Exception(msg.format(value, exit_state))
 
     def wait_while_ramping(self) -> str:
-
         while self.ramping_state() == "ramping":
             self._sleep(self.ramping_state_check_interval())
 
@@ -607,7 +606,6 @@ class AMIModel430(VisaInstrument):
         self.coil_constant()
 
     def write_raw(self, cmd: str) -> None:
-
         try:
             super().write_raw(cmd)
         except VisaIOError as err:
@@ -625,7 +623,6 @@ class AMIModel430(VisaInstrument):
                 raise err
 
     def ask_raw(self, cmd: str) -> str:
-
         try:
             result = super().ask_raw(cmd)
         except VisaIOError as err:
@@ -682,6 +679,7 @@ class AMIModel4303D(Instrument):
                 iterable of callable field limit functions that define
                 region(s) of allowed values in 3D magnetic field space
             **kwargs: kwargs are forwarded to base class.
+
         """
         super().__init__(name, **kwargs)
 
@@ -1085,6 +1083,7 @@ class AMIModel4303D(Instrument):
 
         Args:
             values: a tuple of cartesian coordinates (x, y, z).
+
         """
         self.log.debug("Checking whether fields can be set")
 
@@ -1094,7 +1093,6 @@ class AMIModel4303D(Instrument):
 
         # Check if the individual instruments are ready
         for name, value in zip(["x", "y", "z"], values):
-
             instrument = getattr(self, f"_instrument_{name}")
             if instrument.ramping_state() == "ramping":
                 msg = "_set_fields aborted; magnet {} is already ramping"
@@ -1174,7 +1172,6 @@ class AMIModel4303D(Instrument):
             # This will ensure that we are always in a safe region as
             # far as the quenching of the magnets is concerned
             for name, value in zip(["x", "y", "z"], values):
-
                 instrument = getattr(self, f"_instrument_{name}")
                 current_actual = instrument.field()
 
@@ -1282,7 +1279,6 @@ class AMIModel4303D(Instrument):
         return return_value
 
     def _get_setpoints(self, names: Sequence[str]) -> float | list[float]:
-
         measured_values = self._set_point.get_components(*names)
 
         # Convert angles from radians to degrees
@@ -1300,7 +1296,6 @@ class AMIModel4303D(Instrument):
         return return_value
 
     def _set_setpoints(self, names: Sequence[str], values: Sequence[float]) -> None:
-
         kwargs = dict(zip(names, np.atleast_1d(values)))
 
         set_point = FieldVector()
